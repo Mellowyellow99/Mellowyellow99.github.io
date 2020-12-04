@@ -1,0 +1,27 @@
+---
+title: Test Post
+author: ''
+date: '2020-12-04'
+slug: test-post
+categories: []
+tags: []
+description: ''
+---
+# Heading of my post
+
+content of my post!
+
+## Subheading
+
+more content
+
+```{r}
+quakes <- quakes
+```
+
+```{python}
+
+```
+
+<center>
+![](/post/2020-12-04-test-post_files/13-137812_texas-longhorns-banner-clip-art-royalty-free-stock.png){width=20%}

@@ -1,0 +1,192 @@
+---
+title: "Exploratory Data Analysis (Project 1)"
+author: "Melanie Albrecht"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+## Introduction:
+
+Considering that we are in the midst of a very important presidential election, I knew that I wanted to revolve this project around politics. With that being said, one of the datasets that I chose to use is titled `Election08` and contains information about the 2008 United States (U.S.) presidential election on a state-by-state basis, including the District of Columbia (51 observations total). There are 7 variables within the dataset (all listed/described below) and the data primarily comes from the U.S. Census Bureau, with the exception of the variable `Dem.Rep` which came from a 2008 Gallup survey.
+
+`State`- Name of the state
+
+`Abr`- State Abbreviation
+
+`Income`- Per capita income of the state as of 2007 (dollars)
+
+`HS`- Percentage of adults with at least a high school diploma
+
+`BA`- Percentage of adults with at least a college education
+
+`Dem.Rep`- Differences in percentage Democrat and percentage Republican
+
+`ObamaWin`- Obama (Democrat) wins the state is designated as 1 and McCain (Republican) wins are designated as 0
+
+The other dataset I chose is titled `SAT` and contains information regarding state-by-state SAT scores from the years 1994 to 1995. Although this dataset also contained other variables regarding state measures of educational expenditure, I decided to eliminate those variables because they were not relevant to what I was interested in for this project. Thus, I have listed the 4 variables from this dataset that I will be using (listed below) and all the data was sourced from the American Statistical Association (AMSTAT). I thought it would be interesting to join these two data sets by their common variable `State` in order to see if and how state indicators of education (i.e. degrees obtained and SAT scores) correlate to political party voting preferences. The reason I chose SAT data from 1994-95 is because the people who took the tests then would have been in their late 20’s early 30’s in 2008, making them a large voting group for that election. Being that one’s political affiliation is not an inherent representation of their education, I did not expect to find any specific associations going into this project; rather, I am interested in discovering if there are any. For example, I could discover that states that elected Obama and lean towards the Democratic party in 2008 had higher average SAT scores, or vice versa. 
+
+`state`- Name of the state
+
+`verbal`- State average verbal SAT score in 1994-95
+
+`math`- Sate average math SAT score in 1994-95
+
+`sat`- State average total SAT score in 1994-95
+
+## Joining the Datasets:
+### Preparing to Join
+```{r}
+library(tidyverse)
+Election08 <- read_csv("Election08.csv")
+SAT <- read_csv("SAT.csv")
+head(Election08)
+head(SAT)
+```
+The above lines of code were necessary to include at the start of this project. First, I needed to pull the package `Tidyverse` from the library, so that I do have to put quotations around the name everytime I use this package for the project. The other two lines were run so that datasets `Election08` and `SAT` could be read and to allow for the necessary operations to be done on them.
+```{r}
+Election08 <- Election08 %>% select(- X1)
+SAT <- SAT %>% select(- X1, - expend, - ratio, - salary, -frac)
+```
+
+There were some variables that I either needed to eliminate from the datasets, or wanted to for the purpose of this project. I did this by using a pipe (%>%) which gives one the ability to take the output of one function (what is on the right of the pipe) and chain it together with the input (what is on the left of the pipe). The select function, as well as the hyphen symbol, were used in tangent to drop the variables/columns from the dataset. The dataset `Election08` was replaced to remove the variable `X1` because it was just a pointless count of the observations. The dataset `SAT` was replaced to also exclude the pointless variable `X1`, as well as the some variables regarding state measures of educational expenditures (`salary`, `ratio`,`frac`, and `expend`), because they were not of interest to me for this project.
+
+### Inner Join
+
+```{r}
+Election08_SAT <- Election08 %>% inner_join(SAT, by=c("State"="state"))
+```
+The above code was used to join the datasets `Election08` and `SAT` together. As was done in the previous section, a pipe was used again and the joined dataset was named `Election08_SAT`. Before these datasets were combined, `SAT` had 50 observations (one for each state); whereas, `Election08` had 51 observations (one for each state plus the D.C.). With that being said, it wouldn't make sense to only have election data for D.C. with no SAT data to correspond with it, so the function inner_join was used because it drops any rows/observations from either dataset that don't match based on the ID variables (state name). Thus, the resulting joined dataset has 50 observations and does not include D.C.. Since RStudio cares about capitalization, the `State` and `state` variables from `Election08` and `SAT` respectively were considered non matching ID names. To overcome this, I have to use the by= argument in cohesion with the c() function to indicate that `State` and `state` are equal ID variables.
+
+## Wrangling Using `dplyr` Functions:
+### Filter
+```{r}
+Election08_SAT %>% filter(sat>=mean(sat), ObamaWin==1) %>% summarize(count=n())
+
+Election08_SAT %>% filter(sat>=mean(sat), ObamaWin==0) %>% summarize(count=n())
+```
+
+### Arrange
+```{r}
+Election08_SAT %>% arrange(Dem.Rep)
+```
+The above code was a simple way to show that Utah is the state with the most Republicans (lowest Dem.Rep value), and Rhode Island had the most Democrats (highest Dem.Rep value) in 2008.
+
+### New Categorical Variables
+```{r}
+Election08_SAT <- Election08_SAT%>%mutate(sat_cat = case_when(sat>1000 ~ "high", sat<=1000 & 900<=sat ~ "med", sat<900 ~ "low"))
+
+Election08_SAT <- Election08_SAT%>%mutate(ObamaWin_cat = case_when(ObamaWin==1 ~ "Obama", ObamaWin==0 ~ "McCain"))
+```
+
+### Group_by and Summarize
+```{r}
+Election08_SAT %>% group_by(sat_cat) %>% summarize(mean_Dem.Rep=mean(Dem.Rep,na.rm=T), sd_Dem.Rep=sd(Dem.Rep, na.rm=T), min_Dem.Rep=min(Dem.Rep, na.rm=T), max_Dem.Rep=max(Dem.Rep, na.rm=T), mean_HS=mean(HS, na.rm=T), sd_HS=sd(HS, na.rm=T), min_HS=min(HS, na.rm=T), max_HS=max(HS, na.rm=T), mean_BA=mean(BA, na.rm=T), sd_BA=sd(BA, na.rm=T), min_BA=min(HS, na.rm=T), max_BA=max(BA, na.rm=T),mean_verbal=mean(verbal, na.rm=T), sd_verbal=sd(verbal, na.rm=T), min_verbal=min(verbal, na.rm=T), max_verbal=max(verbal, na.rm=T), mean_math=mean(math, na.rm=T), sd_math=sd(math, na.rm=T), min_math=min(math, na.rm=T), max_math=max(math, na.rm=T), mean_Income=mean(Income, na.rm=T), sd_Income=sd(Income, na.rm=T), min_Income=min(Income, na.rm=T), max_Income=max(Income, na.rm=T), count=n())
+
+Election08_SAT %>% group_by(sat_cat) %>% summarize(mean_Dem.Rep=mean(Dem.Rep,na.rm=T), sd_Dem.Rep=sd(Dem.Rep, na.rm=T), min_Dem.Rep=min(Dem.Rep, na.rm=T), max_Dem.Rep=max(Dem.Rep, na.rm=T), mean_HS=mean(HS, na.rm=T), sd_HS=sd(HS, na.rm=T), min_HS=min(HS, na.rm=T), max_HS=max(HS, na.rm=T), mean_BA=mean(BA, na.rm=T), sd_BA=sd(BA, na.rm=T), min_BA=min(HS, na.rm=T), max_BA=max(BA, na.rm=T),mean_verbal=mean(verbal, na.rm=T), sd_verbal=sd(verbal, na.rm=T), min_verbal=min(verbal, na.rm=T), max_verbal=max(verbal, na.rm=T), mean_math=mean(math, na.rm=T), sd_math=sd(math, na.rm=T), min_math=min(math, na.rm=T), max_math=max(math, na.rm=T), mean_Income=mean(Income, na.rm=T), sd_Income=sd(Income, na.rm=T), min_Income=min(Income, na.rm=T), max_Income=max(Income, na.rm=T), count=n()) %>% pivot_longer(-1)
+```
+(Note about the above code: pivot_wider() could be used to return the dataframe to its original wider state.)
+
+### Summarize w/o Group_by
+```{r}
+Election08_SAT %>% summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T)
+Election08_SAT %>% summarize_if(is.numeric, median, na.rm=T)
+Election08_SAT %>% summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T)
+```
+
+### Correlation Matrix
+```{r}
+Election08_SAT %>% select_if(is.numeric) %>% cor(use="pair")
+```
+
+### Disscusion
+  When using the filter function to choose states that had both above average total SAT scores and voted for Obama (ObamaWin=1), I found that there were only 8 states that satisfied these conditions. However, when I filtered again for above average SAT scores, but then states that elected McCain (ObamaWin=0) instead, I discovered that there were 16 states that satisfied this condition. The fact that there were more states that elected McCain in 2008 that had above average SAT scores in 1994-95 (when the largest voting group tested), than those who elected Obama, suggests that higher SAT scores may result in an increased likelihood of voting for McCain. Similarly, when summary statistics were computed for states grouped by their categorical variable of total state SAT scores, the states in the "low" SAT score group had the highest mean difference between percentage Democrat and percentage Republican(mean_Dem.Rep=15.64). Whereas, the "high" SAT score group had the lowest difference in percentage Democrat and percentage Republican (mean_Dem.Rep=5.15). This indicates that states with higher total SAT scores in 1994-95 tend to also have more republican than democrats as of 2008. However, a somewhat interesting result to compare to these two findings was that the "high" state total SAT score group had the lowest mean percentage of adults with at least a college education (`BA`). This tells us that SAT scores may not translate to the completion of a college degree, which is another educational factor that could influence political party affiliation.
+  
+  Computing the median, 1st quartile (Q1), and 3rd quartile (Q3) for each of the numeric variables in the `Election08_SAT` dataset, provided information regarding how spread out the middle 50% of data is for each variable. The differences between Q3 and Q1 were relatively similar for the `verbal` and `math` variable, which indicates that the spread of the middle 50% of data for total state verbal and math scores were nearly equivalent. However, the differences between Q3 and Q1 for total SAT scores was fairly large (~135 points), which indicates that the middle 50% of data in this variable has a greater spread. The difference between Q3 and Q1 is representative of the interquartile range; thus, the data from the table under the "Summarize w/o Group-by" section could be used to compute the IQR for each numeric variable, as I just did for `verbal`, `math`, and `sat`. (Note that the results of the correlation matrix will not be discussed in this section because the same information will be addressed by the correlation heatmap in the next section of this project.)
+
+## Visualizing:
+###Correlation Heatmap
+```{r}
+Election08_SAT%>%select_if(is.numeric)%>%cor%>%as.data.frame%>% rownames_to_column%>%pivot_longer(-1)%>% ggplot(aes(rowname,name,fill=value))+geom_tile() + geom_text(aes(label=round(value,2))) + xlab("") + ylab("") + coord_fixed()+scale_fill_gradient2(low="red",mid="white",high="blue") + ggtitle("Correlation Heatmap of Numeric Variables")
+```
+  The above correlation heatmap is a visual representation of the table created in the correlation matrix section of this project. The heatmap shows that there are not that many variables that are highly correlated to each other; the strongest correlations (indicated by the color blue) were found to be between the total state average SAT scores and the state averages for specific sections of the SAT. This isn't really relevant to the purpose of this project, which is to explore how state indicators of education relate to political party preferences, because those results just tell us that states with the highest average total SAT scores also tend to have the highest average scores in the SAT subsections (math and verbal). Along similar lines, it was also found that that the percentage of adults in each state with at least a college level education is relatively strongly, positively correlated with state per capita income (correlation of 0.76). Again, this is somewhat irrelevant to the project because it is not about how education influences income; however, it is still an interesting finding. 
+  
+  Nonetheless, the findings that are relevant to this project have to do with how state SAT scores correlate to indicators of political affiliation (such as `ObamaWin` and `Dem.Rep`). The results of this heatmap show that state total average SAT scores, as well as average scores in the math and verbal sections, have a moderate negative correlation with `Dem.Rep` and `Obama.Win` (correlations ranging from 0.37-0.43). High `ObamaWin` values indicate that Obama was favored over McCain and high `Dem.Rep` values mean that there is a larger percentage of Republicans that Democrats in that particular state. Thus, a negative correlation between these 2 variables and state average SAT scores suggests that the higher a state's average SAT scores, the more likely it is to elect McCain and have a majority of Republicans (i.e. low `ObamaWin` and `Dem.Rep`). (Please note that there were other correlations found; however, to avoid being overly repetitive, I will address them in my discussion of the other 2 plots below.)
+
+### Scatter Plot
+```{r}
+ggplot(data = Election08_SAT, aes(x = BA, y = Dem.Rep)) + geom_point(size=4, aes(color = State)) + geom_smooth(method = "lm", se=FALSE, color="red") + theme(legend.position = "none") + xlab("Percentage of Adults with at Least a College Education") + ylab("Percentage Democrat-Percentage Republican") + ggtitle("College Education Rates vs Difference Among Political Affiliations Per State")
+```
+This is a scatter plot showing the correlation between the percentage of adults with at least a college education (`BA`) and the differences in percentage democrat versus republican, per state (states are distinguished by the different colored points). The red regression line shows that there is a moderate, positive correlation between `BA` and `Dem.Rep`. (Note that this correlation was also shown in the previous correlation heatmap, in which the correlation was found to be 0.41.) In the case of these 2 variables, a moderate, positive correlation means that in 2008, the higher a state's percentage of adults with at least a college education, the larger the state's difference in percentage democrats versus republicans. Therefore, this somewhat indicates that having more college educated people in a state leads to that state having more democrats than republicans. (Keep in mind that all of the data included in this graph is from 2008, so this correlation may not be the exact same in our current climate.)
+
+### Grouped Bar Graph
+```{r}
+ggplot(Election08_SAT, aes(x = sat_cat, y = Income, fill=ObamaWin_cat)) + geom_bar(stat="summary", position="dodge") + geom_errorbar(stat="summary",position="dodge", color="gray") + scale_y_continuous(breaks=seq(0,50000,5000), labels=scales::dollar) + theme(axis.text.x = element_text(angle=45, hjust=1)) + xlab("Category of State Average Total SAT Score") + ylab("Mean State Per Capita Income in 2007 (dollars)") + ggtitle("The Influence of State Average SAT Scores on State Per Capita Income in Relation to Election Results")
+```
+  This grouped bar graph is a visual representation of some of the more interesting findings from this project. First of all, it shows that a state's average total SAT score is not strongly correlated with the per capita income of a state as of 2007. This is true because if there was a strong correlation, say a positive one for example, then the mean per capita income of states in the high scoring SAT category would be larger than states in either the medium or low SAT score groups. The opposite would be true for a strong negative correlation: the states in the low scoring SAT group would have the largest mean state per capita income, while the states in the high scoring SAT group would have the lowest. Since the error bars are longer for the low and medium SAT score groups, as compared to the high group, there is more variability and less certainty in the state per capita income data for those 2 groups. (Keep in mind that this SAT data is from 1994-95 as a representation of the largest voting group, so the SAT scores of other eligible voting groups could also be influencing this relationship, although not considered in this project.)
+  
+  Although that aspect of the bar graph lacked a strong correlation, there does appear to be a relationship between mean state per capita income in 2007 and whether or not a state elected McCain or Obama. As the graph indicates, states that voted to elect Obama (blue) had, on average, higher state per capita incomes than states that voted to elect McCain (red). This relationship was also shown in the correlation heatmap using the numeric variable `ObamaWin` and the correlation was found to be 0.55.
+
+## PCA
+
+Preparing the Data & Performing PCA:
+```{r}
+Election08_SAT_1<- Election08_SAT %>% select(-Income)
+Election08_SAT_nums<-Election08_SAT_1 %>% select_if(is.numeric) %>% scale
+rownames(Election08_SAT_nums) <- Election08_SAT_1$State
+Election08_SAT_pca<-princomp(Election08_SAT_nums)
+summary(Election08_SAT_pca, loadings=T)
+```
+
+Choosing the Number of Principle Componets (Scree Plot):
+```{r}
+eigval_ElectionSAT<-Election08_SAT_pca$sdev^2
+varprop=round(eigval_ElectionSAT/sum(eigval_ElectionSAT), 2)
+
+ggplot() + geom_bar(aes(y=varprop, x=1:7), stat="identity") + xlab("") + geom_path(aes(y=varprop, x=1:7)) + 
+  geom_text(aes(x=1:7, y=varprop, label=round(varprop, 2)), vjust=1, col="white", size=5) + 
+  scale_y_continuous(breaks=seq(0, .6, .2), labels = scales::percent) + 
+  scale_x_continuous(breaks=1:10)
+```
+
+Computing and Visualizing PCA Scores:
+```{r}
+Election_SAT_df<-data.frame(State=Election08_SAT_1$State, PC1=Election08_SAT_pca$scores[, 1],PC2=Election08_SAT_pca$scores[, 2])
+
+ggplot(Election_SAT_df, aes(PC1, PC2)) + geom_point()
+```
+Interpreting PCA and Scores:
+```{r}
+Election08_SAT_pca$scores[,1:4] %>% as.data.frame %>% top_n(3, Comp.1) #highest on PC1
+Election08_SAT_pca$scores[,1:4] %>% as.data.frame %>% top_n(-3, Comp.1) #lowest on PC1
+
+Election08_SAT_pca$scores[,1:4] %>% as.data.frame %>% top_n(3, wt=Comp.2) #highest on PC2
+Election08_SAT_pca$scores[,1:4]  %>% as.data.frame %>% top_n(3, wt=desc(Comp.2)) #highest on PC2
+```
+Loadings Plot: 
+```{r}
+Election08_SAT_pca$loadings[1:7, 1:2] %>% as.data.frame %>% rownames_to_column %>% ggplot() + geom_hline(aes(yintercept=0), lty=2) + geom_vline(aes(xintercept=0), lty=2) + ylab("PC2") + xlab("PC1") + geom_segment(aes(x=0, y=0, xend=Comp.1, yend=Comp.2), arrow=arrow(), col="red") + geom_label(aes(x=Comp.1*1.1, y=Comp.2*1.1, label=rowname))
+```
+
+### Final PCA Graph
+
+```{r}
+Election_SAT_df <-Election_SAT_df  %>% left_join(Election08_SAT, by="State")
+
+ggplot(Election_SAT_df, aes(PC1, PC2, color=ObamaWin_cat)) + geom_point() + coord_fixed()
+```
+
+###Discussion of PCA
+
+Based on the scree plot that was created, it was decided that PC1 and PC2 were going to be the principal components that were kept to interpret. In terms of PC1, the fact that `Dem.Rep`, `Obama.Win`, and `BA` all have negative PC1 scores, while `verbal`, `sat`, and `math` all have positive PC1 scores, indicates that there must be a tradeoff between these variables. Thus, states with high values `Dem.Rep`, `ObamaWin`, and `BA`, must have lower `verbal`, `sat`, and `math` values. For example, if a state is to the left on the x-axis on the above PCA graph, then it has a high `ObamaWin` and a low `sat`. This is clearly shown in the above graph because states that elected Obama (which would correlate to a high `ObamaWin` of one), are all shown in blue towards the left of the graph, and vice versa for states that elected McCain. Furthermore, since all of the above data points are extremely spread out in all directions, so both dimensions (PC1 and PC1) have a great amount of variability. With regards to PC2, the biggest contribution to PC2 is the variable `HS`, followed by `BA` and `ObamaWin`. Thus, the states located at the top of the above PCA graph will have the highest percentage of adults with at least a high school degree. It is interesting that `HS` was the greatest contributor for PC2 because it was the weakest contributor for PC1.

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on My Website</title>
+    <link>/project/</link>
+    <description>Recent content in Projects on My Website</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Tue, 01 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Project 2</title>
+      <link>/project/project2/</link>
+      <pubDate>Tue, 01 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description> Test Project 2  </description>
+    </item>
+    
+    <item>
+      <title>Exploratory Data Analysis (Project 1)</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Introduction: Considering that we are in the midst of a very important presidential election, I knew that I wanted to revolve this project around politics. With that being said, one of the datasets that I chose to use is titled Election08 and contains information about the 2008 United States (U.S.) presidential election on a state-by-state basis, including the District of Columbia (51 observations total). There are 7 variables within the dataset (all listed/described below) and the data primarily comes from the U.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -13,7 +13,7 @@
       <pubDate>Thu, 10 Dec 2020 00:00:00 +0000</pubDate>
       
       <guid>/post/2020/12/10/test-post/</guid>
-      <description> UT Resource Recovery Reflecting on Past Professional Experience   </description>
+      <description>UT Resource Recovery Reflecting on Past Professional Experience During my junior year of college, which was from Fall 2019 to Spring 2020, I would for the Resource Recovery program at the University of Texas (UT). I was an intern for both their zero waste events and waste audit teams. After a semester of working there, my title was promoted to &amp;quot;Zero Waste Events Specialist&amp;quot;. As someone who desires to spend their life working in the fields of conservation and sustainability, I cannot stress enough how grateful I am for the growth that this internship provided me.</description>
     </item>
     
     <item>
@@ -32,17 +32,6 @@
       
       <guid>/project/project1/</guid>
       <description>Introduction: Considering that we are in the midst of a very important presidential election, I knew that I wanted to revolve this project around politics. With that being said, one of the datasets that I chose to use is titled Election08 and contains information about the 2008 United States (U.S.) presidential election on a state-by-state basis, including the District of Columbia (51 observations total). There are 7 variables within the dataset (all listed/described below) and the data primarily comes from the U.</description>
-    </item>
-    
-    <item>
-      <title>Hello R Markdown</title>
-      <link>/post/2015/07/23/hello-r-markdown/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
-      
-      <guid>/post/2015/07/23/hello-r-markdown/</guid>
-      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
-You can embed an R code chunk like this:
-summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
     </item>
     
     <item>

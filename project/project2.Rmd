@@ -1,8 +1,226 @@
 ---
-title: "Project 2"
-author: "Me"
-date: "2020-12-01"
-output: html_document
+title: "FINALPROECT2"
+author: "Melanie Albrecht"
+date: "2020-11-19"
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
 ---
 
-## Test Project 2
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+```
+
+##Introduction
+
+```{r}
+Bird_Nest <- read_csv("BirdNest.csv")
+Bird_Nest <- Bird_Nest %>% select(- X1, - Page, - Species, - Nestling, - Incubate)
+Bird_Nest <- Bird_Nest %>% na.omit()
+Bird_Nest <- Bird_Nest[-c(11, 12, 29, 30, 21, 28),] #these rows had errors with the data (didn't match the format)
+Bird_Nest <- Bird_Nest%>%mutate(Color_cat = case_when(Color==1 ~ "Yes", Color==0 ~ "No"))
+#The above code were lines I ran to set up my dataset
+```
+
+Throughout this semester, I have been enrolled in a course called "Animal Behavior," and we have spent a lot of time discussing various species of birds as well as their behaviors (primarily those related to parental care). With that being said, I decided to choose the dataset `Bird_Nest` because it contains information regarding species and nest characteristics for many birds from North America. All of the data came from a project that a student from Grinnell College completed in 1999, using information from a book called, "The Birders Handbook (1998)." For the purpose of this project, I chose to eliminate certain variables that I deemed unnecessary (as you can tell from the above code) and will be using the 8 variables that are listed below. There was also one observation that contained NAs in many of the columns, so I decided to remove it in its entirety (there are now 77 different birds/observations). 
+
+`Common`- The non-latin name for the species (identifier variable)
+
+`Length`- The species's average body length in centimeters
+
+`Nesttype`- The type of nest the species occupies (cup, cavity, saucer, or crevice)
+
+`Location`- The location of the bird's nest (deciduous forest, bridge, shrub, ground, bank, building, coniferous forest, snag, or cliff)
+
+`No.eggs`- Average number of eggs in the nest
+
+`Color`- Solid/plain color is designated as 0 and speckled/spotted coloration is designated as 1
+
+`Color_cat`- This is an extra categorical variable (not include in the above count of variables) that I created, if the observation was a 1 in the numeric color variable it is designated as "Yes" here and if it was 0 it is catagorized as "No"
+
+`Totcare`- Total species care by parent (incubating plus nestling time)
+
+`Closed.`- 0 is the designation for open nest (saucer or cup) and 1 represents closed nest (cavity or crevice)
+
+## MANOVA
+
+### MANOVA Assumptions
+```{r}
+library(rstatix)
+
+nest <- Bird_Nest$Nesttype 
+DVs <- Bird_Nest %>% select(Length,No.eggs,Totcare)
+
+#Test multivariate normality for each group (null: assumption met)
+sapply(split(DVs,nest), mshapiro_test)
+```
+The results of the Shapiro test confirmed that the data is not distributed normally (all p values were less than 0.05). Thus, this test concluded that the homogeneity of covariance assumption was violated.
+
+### MANOVA & Follow-up Tests
+```{r}
+man1<-manova(cbind(Length, No.eggs, Totcare)~Nesttype, data=Bird_Nest)
+summary(man1) #The p was significant, so now I get the univariate ANOVA
+summary.aov(man1) #univarte ANOVAs from MANOVA
+Bird_Nest%>%group_by(Nesttype)%>%summarize(mean(Length),mean(No.eggs),mean(Totcare)) #Eyeball the mean differences
+pairwise.t.test(Bird_Nest$Length, Bird_Nest$Nesttype, p.adj = "none")
+pairwise.t.test(Bird_Nest$No.eggs, Bird_Nest$Nesttype, p.adj = "none")
+pairwise.t.test(Bird_Nest$Totcare, Bird_Nest$Nesttype, p.adj = "none")
+0.05/13 #bonferroni correction
+1- (.95)^13 #probability of having at least 1 type 1 error
+```
+
+To determine the effect of the type of nest (cavity, crevice, cup, or saucer) on 3 dependent variables (body length, number of eggs, and total time of care), I ran a 1-way MANOVA. The null hypothesis was that for the 3 DVs, means for each nest type are equal, and the alternative being that means are not equal. (Refer to the previous section for discussion of MANOVA assumptions). The results on the one-way MANOVA confirmed that, for at least one of the dependent variables, there were significant differences found across the different types of nests, Pillai trace = .32 pseudo F(9, 219) = 2.9724 p < 0.05. 
+
+After the MANOVA was significant, I needed to conduct univariate ANOVAs for each dependent variable. This time I accounted for Type 1 error rates when doing multiple comparisons, by using the bonferroni correction, which was found to be 0.0038. I found this by dividing the original alpha of 0.05 by the number of tests that were run which was 13 (1 MANOVA, 3 ANOVAs, and 9 t-tests). The probability of having at least one type I error is 0.487. Using the adjusted significance level, it was found that the univariate ANOVAs for all 3 dependent variables were insignificant, F(3, 73) = 119.26, p > .0038 (for each DV). The results of the post hoc analysis also came back insignificant (fail to reject the null hypothesis) when considering the bonferroni correction. This means that none of the nest types had significantly different mean values with regards to body length, number of eggs, and total parental care. However, the original MANOVA is still significant when considering this adjustment, Pillai trace = .32 pseudo F(9, 219) = 2.9724 p < 0.0038. 
+ 
+## Randomization Test
+### One-way ANOVA
+```{r}
+boxplot(No.eggs ~ Nesttype, data = Bird_Nest) #normality assumption was
+library(car)
+leveneTest(No.eggs ~ Nesttype, data = Bird_Nest) #equal variance assumption was met
+summary(aov(No.eggs~Nesttype,data=Bird_Nest))
+```
+The above one-way ANOVA was ran prior to the randomization test in order to compute the observed F-statistic.
+
+### The Randomization Test
+```{r}
+obs_F<-4.685
+
+Fs<-replicate(5000,{
+  new<-Bird_Nest%>%mutate(No.eggs=sample(No.eggs))
+  SSW<- new%>%group_by(Nesttype)%>%summarize(SSW=sum((No.eggs-mean(No.eggs))^2))%>%summarize(sum(SSW))%>%pull
+  SSB<- new%>%mutate(mean=mean(No.eggs))%>%group_by(Nesttype)%>%mutate(groupmean=mean(No.eggs))%>%summarize(SSB=sum((mean-groupmean)^2))%>%summarize(sum(SSB))%>%pull
+  (SSB/3)/(SSW/73)
+})
+
+mean(Fs>obs_F) #This is the p-value
+
+hist(Fs, prob=T); abline(v = obs_F, col="red",add=T)
+```
+To determine the effect of the nest type on the number of eggs contained in a nest, I decided to conduct a randomization test for the F-statistic/Anova. The null hypothesis was that the mean number of eggs does not differ based on the type of nest and the alternative was that there are differences in mean egg number between the various types of nests. The histogram shows the expected distribution of F-statistics under the null hypothesis (randomization distribution). The observed F-statistic (4.685) is shown in red on the histogram. The p-value was found to be 0.0322, which is equivalent to the proportion of F-statistics in the distribution that are greater than 4.685 (observed). Since this p-value is less than 0.05, the null hypothesis is rejected and I can conclude that the mean number of eggs does differ based on the type of nest. So, although the observed F-statistic is plausible under the null distribution, it is far enough out in this distribution that we can reject the null hypothesis
+
+##Linear Regression Model
+```{r}
+Bird_Nest$Totcare_c <- Bird_Nest$Totcare - mean(Bird_Nest$Totcare)
+fit_1<-lm(Length ~ Color_cat*Totcare_c, data=Bird_Nest)
+summary(fit_1)
+```
+The intercept is 18.45, which represents the predicted body length for non colored birds (solid/plain) with an average amount of total parental care. For birds with average amounts of parental care, colored birds (spotted/speckled) have a predicted body length that is 0.368cm less than non-colored birds. The estimated slope for total parental care on body length for non-colored birds is -0.076 (negative correlation). Furthermore, the slope of total parental care on body length for colored birds is 0.561 greater than for non-colored birds. The R-squared value is 0.164, which represents the proportion of variation that the model explains.
+
+### Plot of Regression
+```{r}
+ggplot(Bird_Nest, aes(x=Totcare_c, y=Length, color=Color_cat)) + geom_point(aes(color=Color_cat)) + geom_smooth(method = "lm")
+```
+
+### Assumptions
+```{r}
+library(lmtest)
+library(sandwich)
+bptest(fit_1) #homoskedasticity assumption was met
+
+resids<-fit_1$residuals; fitvals<-fit_1$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, col="red")
+ggplot()+geom_histogram(aes(resids),bins=10)
+```
+The resulting p-value for the Breuch-Pagan test was 0.097, which is greater than 0.05, so it can be confirmed that the data meets the homoskedasticity assumption. Based on the scatterplot, one can see that the data is fairly linear, so the linearity assumption can be confirmed; however, there are some outliers which linear regressions are sensitive to. Lastly, the histogram of the residuals shows that the data looks pretty normal.
+
+### W/ Robust Standard Errors
+```{r}
+coeftest(fit_1, vcov = vcovHC(fit_1))
+```
+There was only 1 significant result that was found when recomputing the regression with robust standard errors, which was a change with regards to the previous regression. That being: the slope of total parental care on body length for colored birds is 0.561 greater than for non-colored birds. This difference is in fact significant,(b= 0.561,t= 2.49, p= 0.015), even though it wasn't before. 
+
+## Bootstrapped SEs
+```{r}
+samp_distn<-replicate(5000, {
+       boot_dat <- sample_frac(Bird_Nest, replace=T) 
+       fit_2 <- lm(Length ~ Color_cat*Totcare_c, data=boot_dat) 
+       coef(fit_2)
+   })
+
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+```
+The bootstrapped standard errors (SEs) only vary slightly from the previous SEs that were computed. (Note that the SE for the interaction of color and total parental care is not available in this case.) When compared to the original SEs, the bootstrapped ones are slighly smaller which means there is less of a spread around the mean (example: the SE for the intercept changed from 1.427 to 1.195). When compared to the robust SEs, the bootstrapped ones are slighly larger which means there is more of a spread around the mean (example: the SE for the intercept changed from 1.149 to 1.195).
+
+##Logistic Regression (2 variables)
+```{r}
+library(tidyverse)
+library(lmtest)
+library(glmnet)
+library(sandwich)
+fit_log <- glm(Closed. ~ Length + No.eggs,data = Bird_Nest,family = binomial(link="logit"))
+coeftest(fit_log)
+exp(coef(fit_log))
+```
+The odds of the nest being closed is 0.027 when body length is 0 cm and the number of eggs is 0 (intercept). When controlling for the number of eggs, for every 1 cm increase in body length, the odds of the nest being closed increases by a factor of 0.938 (not significant). When controlling for body length, for every 1 unit increase in the number of eggs, the odds of the nest being closed increases by a factor of 2.22 (significant, p-value= 0.0159).
+
+```{r}
+prob <- predict(fit_log, type = "response")
+
+(56+7)/77 #accuracy
+7/8 #specificity
+56/60 #sensitivity
+56/57 #precision
+table(predict = as.numeric(prob > 0.5), truth = Bird_Nest$Closed.) %>% addmargins 
+```
+The accuracy is 0.818, which represents the proportion of correctly classified birds (closed or open nest). The sensitivity or true positive rate is the proportion of open nests (designated as 0) that were correctly classified and it is 0.812. The specificity or true negative rate is 0.875 and it represents the proportion of closed nests (designated as 1) that were correctly classified. The precision, which is the propotion of nests classified as open that actually are open, is 0.982. 
+(Note: it would not knit the class_diag function because it said that it did not exist)
+
+```{r}
+library(plotROC)
+ROC_plot <- ggplot(data = Bird_Nest) + geom_roc(aes(d = Closed., m = Length + No.eggs), n.cuts = 0)
+ROC_plot
+calc_auc(ROC_plot)
+```
+The tradeoff between sensitivity and specificity can be visualized with the above ROC curve. The AUC value is the area under that respective curve. The computed AUC is 0.468, which is considered a very bad AUC value.
+
+## Logistic Regression (all variables)
+### Classification Diagnostics
+```{r}
+library(tidyverse)
+library(lmtest)
+
+BirdNest_ALL <- Bird_Nest %>% select(-Color_cat, -Common, -Location) #got rid of unecessary variables and ones I accidentally made
+
+fit_ALL <- glm(Closed. ~ ., data = BirdNest_ALL, family = "binomial")
+prob_ALL <- predict(fit_ALL, type = "response")
+
+table(predict = as.numeric(prob_ALL > 0.5), truth = BirdNest_ALL$Closed.) %>% addmargins
+```
+It would not knit because it said the class_diag function did not exist.
+### LASSO
+```{r}
+library(glmnet)
+set.seed(1234)
+
+LASS_response <- as.matrix(BirdNest_ALL$Closed.)
+BNest_preds <- model.matrix(Closed. ~ ., data = BirdNest_ALL)[, -1]
+BNest_preds <- scale(BNest_preds)
+cv <- cv.glmnet(BNest_preds, LASS_response, family = "binomial")
+lasso_fit <- glmnet(BNest_preds, LASS_response, family = "binomial", lambda = cv$lambda.1se)
+coef(lasso_fit)
+```
+As determined by the LASSO, the variables `Nesttypecup` and `Nesttypesaucer` will be retained because they are the most predictive variables.
+
+The rest would not knit because it said the class_diag function did not exist.

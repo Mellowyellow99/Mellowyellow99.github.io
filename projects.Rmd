@@ -13,8 +13,9 @@ Check out some of my coding projects below:
 
 <i class="fa fa-line-chart"></i> &nbsp; [Modeling, Inference, Prediction](/project/project2/)
 
+Here are some of my non-coding related projects:
 
-<i class="fa fa-pie-chart"></i> &nbsp; [My Other Projects](/project/project3/)
+<i class="fa fa-tree"></i> &nbsp; [Community Farming Project](/project/project3/)
 
-<i class="fa fa-tasks"></i> 
+
 

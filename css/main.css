@@ -2,7 +2,7 @@
 html, body {
   height: 100%;
   background-color: #fff;
-  font-family: 'Copperplate',fantasy;
+  font-family: 'Source Sans Pro', sans-serif;
   /* The html and body elements cannot have any padding or margin. */
   border-top: 20px solid #8bd8c6;
 }
@@ -157,7 +157,7 @@ html, body {
   padding-top: 5%;
 }
 .blog-post{
-  font-family: 'Source Sans Pro', sans-serif;
+  font-family: 'Copperplate',fantasy;
   padding-top: 15px;
 }
 .blog-title{

@@ -1,11 +1,13 @@
 ---
-title: "My Other Project"
+title: "Community Farming Project"
 output: html_document
 hidedate: true
 hiderelated: true
 hidediscus: true
 ---
 
+My sophomore year of college, I was enrolled in a course called "Communicating Sustainability," which required me to complete the group project located below. For this project, a couple of classmates and I created a fake marketing agency called "GRAMS". Our goal was to explore the benefits of community farming, in the hopes that we could better market Microfarm, which is a community farm run by students at the University of Texas. (If you have any additional questions on this project, please feel free to email me.)
+
 <center>
-<iframe src="/resume.pdf" width="100%" height="800" border="0"></iframe>
+<iframe src="/project3.pdf" width="100%" height="800" border="0"></iframe>
 </center>

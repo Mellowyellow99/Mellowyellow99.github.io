@@ -26,21 +26,21 @@
     </item>
     
     <item>
+      <title>Community Farming Project</title>
+      <link>/project/project3/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project3/</guid>
+      <description>My sophomore year of college, I was enrolled in a course called &amp;quot;Communicating Sustainability,&amp;quot; which required me to complete the group project located below. For this project, a couple of classmates and I created a fake marketing agency called &amp;quot;GRAMS&amp;quot;. Our goal was to explore the benefits of community farming, in the hopes that we could better market Microfarm, which is a community farm run by students at the University of Texas.</description>
+    </item>
+    
+    <item>
       <title>FINALPROECT2</title>
       <link>/project/finalproject2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/project/finalproject2/</guid>
       <description>Introduction Bird_Nest &amp;lt;- read_csv(&amp;quot;BirdNest.csv&amp;quot;) Bird_Nest &amp;lt;- Bird_Nest %&amp;gt;% select(- X1, - Page, - Species, - Nestling, - Incubate) Bird_Nest &amp;lt;- Bird_Nest %&amp;gt;% na.omit() Bird_Nest &amp;lt;- Bird_Nest[-c(11, 12, 29, 30, 21, 28),] #these rows had errors with the data (didn&amp;#39;t match the format) Bird_Nest &amp;lt;- Bird_Nest%&amp;gt;%mutate(Color_cat = case_when(Color==1 ~ &amp;quot;Yes&amp;quot;, Color==0 ~ &amp;quot;No&amp;quot;)) #The above code were lines I ran to set up my dataset Throughout this semester, I have been enrolled in a course called &amp;quot;Animal Behavior,&amp;quot; and we have spent a lot of time discussing various species of birds as well as their behaviors (primarily those related to parental care).</description>
-    </item>
-    
-    <item>
-      <title>My Other Project</title>
-      <link>/project/project3/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project/project3/</guid>
-      <description>    </description>
     </item>
     
   </channel>

@@ -74,7 +74,7 @@
 
 <div id="lets-talk-about-pyhton-and-rstudio" class="section level1">
 <h1>Let's talk about Pyhton and Rstudio</h1>
-<p>In the Fall of 2020, I took a course called &quot;Computational Biology and Bioinformatics&quot; at the University of Texas, in which I learned how to navigate Rstudio and Python programming languages. What I found super interesting about these resources is that they aren't mutually exclusive and that you can actually use them both together! The two coding projects that are located in the &quot;Projects&quot; tab of this website were completed solely using Rstudio; however, in this post I will show you how one can pull a file from Rstudio and complete Python functions using it. To do so, I will be using a dataset called <code>quakes</code> which is one that I became very familar with throughout the course.</p>
+<p>In the Fall of 2020, I took a course called &quot;Computational Biology and Bioinformatics&quot; at the University of Texas, in which I learned how to navigate Rstudio and Python programming languages. What I found super interesting about these resources is that they aren't mutually exclusive and that you can actually use them both together! The two coding projects that are located in the &quot;Projects'' tab of this website were completed solely using Rstudio; however, in this post I will show you how one can pull a file from Rstudio and complete Python functions using it. To do so, I will be using a dataset called <code>quakes</code> which is one that I became very familiar with throughout the course. The data in this set contains information on various different characteristics of earthquakes that occured in the Fiji area (latitude, depth, etc.). It is important that I mention that the <code>reticulate</code> package is what allows people to interact with R and Python together.</p>
 <pre class="r"><code>library(reticulate)
 quakes_blog &lt;- quakes
 hist(quakes$lat)</code></pre>
@@ -83,6 +83,12 @@ hist(quakes$lat)</code></pre>
 <p>Now I'm going to use the same <code>quakes</code> dataset from Rstudio to run some example python codes for y'all. To access R defined objects, I have to include <code>r.</code> within my code (as you can see below).</p>
 <pre class="python"><code>r.quakes_blog.mag.mean()</code></pre>
 <pre><code>## 4.6204</code></pre>
+<pre class="python"><code>r.quakes_blog.lat.mean()</code></pre>
+<pre><code>## -20.64275</code></pre>
+<p>The image below shows the location of a massive earthquake that occured in Fiji in 2018.</p>
+<center>
+<img src="../../../../../post/2020-12-11-python-and-r_files/Fiji-earthquake-1005411.jpg" />
+</center>
 </div>
 
             
